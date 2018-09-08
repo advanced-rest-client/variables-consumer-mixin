@@ -1,5 +1,5 @@
 {
-  "name": "@api-components/variables-consumer-mixin",
+  "name": "@advanced-rest-client/variables-consumer-mixin",
   "description": "Mixin to be used by elements that consumes variables",
   "version": "2.0.0-preview",
   "license": "Apache-2.0",

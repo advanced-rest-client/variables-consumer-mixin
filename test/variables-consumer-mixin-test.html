@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+  <title>variables-consumer-mixin test</title>
+  <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <link rel="import" href="vars-consumer.html">
+</head>
+<body>
+  <test-fixture id="Basic">
+    <template>
+      <vars-consumer></vars-consumer>
+    </template>
+  </test-fixture>
+
+  <script>
+  suite('variables-consumer-mixin', () => {
+    function noopEvent(e) {
+      e.preventDefault();
+      e.detail.result = Promise.resolve();
+    }
+
+    function noopEnvironmentList() {
+      window.addEventListener('environment-list', function f(e) {
+        window.removeEventListener('environment-list', f);
+        noopEvent(e);
+      });
+    }
+
+    suite('Initialization flow', () => {
+      test('Asks for current environment', () => {
+        noopEnvironmentList();
+        let called = false;
+        window.addEventListener('environment-current', function f() {
+          window.removeEventListener('environment-current', f);
+          called = true;
+        });
+        fixture('Basic');
+        assert.isTrue(called);
+      });
+
+      test('Sets environment from the event', () => {
+        noopEnvironmentList();
+        window.addEventListener('environment-current', function f(e) {
+          window.removeEventListener('environment-current', f);
+          e.preventDefault();
+          e.detail.environment = 'test';
+        });
+        const element = fixture('Basic');
+        assert.equal(element.environment, 'test');
+      });
+
+      test('Sets variables from the event', () => {
+        noopEnvironmentList();
+        window.addEventListener('environment-current', function f(e) {
+          window.removeEventListener('environment-current', f);
+          e.preventDefault();
+          e.detail.variables = ['test'];
+        });
+        const element = fixture('Basic');
+        assert.deepEqual(element.variables, ['test']);
+      });
+
+      test('Asks for environments list', () => {
+        let called = false;
+        window.addEventListener('environment-list', function f(e) {
+          window.removeEventListener('environment-list', f);
+          noopEvent(e);
+          called = true;
+        });
+        fixture('Basic');
+        assert.isTrue(called);
+      });
+
+      test('Sets environments list from the event', (done) => {
+        window.addEventListener('environment-list', function f(e) {
+          window.removeEventListener('environment-list', f);
+          e.preventDefault();
+          e.detail.result = Promise.resolve(['test']);
+        });
+        const element = fixture('Basic');
+        setTimeout(() => {
+          assert.deepEqual(element.environments, ['test']);
+          done();
+        });
+      });
+
+      test('refreshEnvironments() rejects when no model', (done) => {
+        noopEnvironmentList();
+        const element = fixture('Basic');
+        element.refreshEnvironments()
+        .catch(() => {
+          done();
+        });
+      });
+
+      test('refreshEnvironments() repets event when no model', (done) => {
+        noopEnvironmentList();
+        const element = fixture('Basic');
+        element.refreshEnvironments()
+        .then(() => {
+          done();
+        });
+        noopEnvironmentList();
+      });
+    });
+
+    function fire(type, detail) {
+      if (!detail) {
+        detail = {};
+      }
+      const e = new CustomEvent(type, {
+        bubbles: true,
+        detail
+      });
+      document.body.dispatchEvent(e);
+    }
+
+    suite('selected-environment-changed', function() {
+      let element;
+      setup(() => {
+        noopEnvironmentList();
+        element = fixture('Basic');
+      });
+
+      test('Updates environment from the event', function() {
+        fire('selected-environment-changed', {
+          value: 'test'
+        });
+        assert.equal(element.environment, 'test');
+      });
+
+      test('Clears variables', function() {
+        element.variables = ['test'];
+        fire('selected-environment-changed', {
+          value: 'test'
+        });
+        assert.isUndefined(element.variables);
+      });
+    });
+
+    suite('variables-list-changed', function() {
+      let element;
+      let items;
+      setup(() => {
+        noopEnvironmentList();
+        element = fixture('Basic');
+        items = [{_id: 1}, {_id: 2}];
+      });
+
+      test('Updates variables from the event', function() {
+        fire('variables-list-changed', {
+          value: items
+        });
+        assert.deepEqual(element.variables, items);
+      });
+
+      test('Variables list is a copy', function() {
+        fire('variables-list-changed', {
+          value: items
+        });
+        items[0]._id = 3;
+        assert.equal(element.variables[0]._id, 1);
+      });
+    });
+
+    suite('variable-updated', function() {
+      let element;
+      let items;
+      setup(() => {
+        noopEnvironmentList();
+        element = fixture('Basic');
+        items = [{
+          _id: 'a',
+          environment: 'test',
+          value: 'a'
+        }, {
+          _id: 'b',
+          environment: 'test',
+          value: 'b'
+        }];
+      });
+
+      test('Ignores the event when different environment', () => {
+        element.environment = 'default';
+        fire('variable-updated', {
+          value: items[0]
+        });
+        assert.isUndefined(element.variables);
+      });
+
+      test('Adds variable to undefined list', () => {
+        element.environment = 'test';
+        fire('variable-updated', {
+          value: items[0]
+        });
+        assert.deepEqual(element.variables, [items[0]]);
+      });
+
+      test('Appends variable to the list', () => {
+        element.environment = 'test';
+        element.variables = [items[0]];
+        fire('variable-updated', {
+          value: items[1]
+        });
+        assert.deepEqual(element.variables, items);
+      });
+
+      test('Updates a variable', () => {
+        element.environment = 'test';
+        element.variables = items;
+        const item = Object.assign({}, items[0]);
+        item.value = 'c';
+        fire('variable-updated', {
+          value: item
+        });
+        assert.deepEqual(element.variables[0], item);
+      });
+    });
+
+    suite('variable-deleted', function() {
+      let element;
+      let items;
+      setup(() => {
+        noopEnvironmentList();
+        element = fixture('Basic');
+        items = [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}];
+        element.variables = items;
+      });
+
+      test('Does nothing when no items on the list', function() {
+        fire('variable-deleted', {
+          id: 'x'
+        });
+        // no error
+      });
+
+      test('Removes item from the list', function() {
+        fire('variable-deleted', {
+          id: 'b'
+        });
+        assert.lengthOf(element.variables, 2);
+        assert.equal(element.variables[0]._id, 'a');
+        assert.equal(element.variables[1]._id, 'c');
+      });
+    });
+
+    suite('environment-deleted', function() {
+      let element;
+      let items;
+      setup(() => {
+        noopEnvironmentList();
+        element = fixture('Basic');
+        items = [{_id: 'a'}, {_id: 'b'}, {_id: 'c'}];
+        element.environments = items;
+      });
+
+      test('Does nothing when no items on the list', function() {
+        fire('environment-deleted', {
+          id: 'x'
+        });
+        // no error
+      });
+
+      test('Removes item from the list', function() {
+        fire('environment-deleted', {
+          id: 'b'
+        });
+        assert.lengthOf(element.environments, 2);
+        assert.equal(element.environments[0]._id, 'a');
+        assert.equal(element.environments[1]._id, 'c');
+      });
+    });
+
+    suite('environment-updated', function() {
+      let element;
+      let items;
+      setup(() => {
+        noopEnvironmentList();
+        element = fixture('Basic');
+        items = [{
+          _id: 'a',
+          name: 'a'
+        }, {
+          _id: 'b',
+          name: 'b'
+        }];
+      });
+
+      test('Adds environment to undefined list', () => {
+        fire('environment-updated', {
+          value: items[0]
+        });
+        assert.deepEqual(element.environments, [items[0]]);
+      });
+
+      test('Appends environment to the list', () => {
+        element.environments = [items[0]];
+        fire('environment-updated', {
+          value: items[1]
+        });
+        assert.deepEqual(element.environments, items);
+      });
+
+      test('Updates an environment', () => {
+        element.environments = items;
+        const item = Object.assign({}, items[0]);
+        item.name = 'c';
+        fire('environment-updated', {
+          value: item
+        });
+        assert.deepEqual(element.environments[0], item);
+      });
+    });
+
+    suite('Auto computations', function() {
+      let element;
+      setup(() => {
+        noopEnvironmentList();
+        element = fixture('Basic');
+      });
+
+      test('hasVariables is false by default', function() {
+        assert.isFalse(element.hasVariables);
+      });
+
+      test('hasVariables is computed', function() {
+        element.variables = [{
+          _id: 'b',
+          bariable: 'b'
+        }];
+        assert.isTrue(element.hasVariables);
+      });
+
+      test('hasEnvironments is false by default', function() {
+        assert.isFalse(element.hasEnvironments);
+      });
+
+      test('hasEnvironments is computed', function() {
+        element.environments = [{
+          _id: 'b',
+          name: 'b'
+        }];
+        assert.isTrue(element.hasEnvironments);
+      });
+    });
+  });
+  </script>
+</body>
+</html>

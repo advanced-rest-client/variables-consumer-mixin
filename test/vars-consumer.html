@@ -1,0 +1,22 @@
+<link rel="import" href="../../polymer/polymer-element.html">
+<link rel="import" href="../variables-consumer-mixin.html">
+<dom-module id="vars-consumer">
+  <script>
+  /**
+   * An example of implementation of VariablesConsumerMixin
+   *
+   * @customElement
+   * @polymer
+   * @appliesMixin ArcComponents.VariablesConsumerMixin
+   */
+  class VarsConsumer extends ArcComponents.VariablesConsumerMixin(Polymer.Element) {
+    static get is() {return 'vars-consumer';}
+    static get properties() {
+      return {
+
+      };
+    }
+  }
+  window.customElements.define(VarsConsumer.is, VarsConsumer);
+  </script>
+</dom-module>

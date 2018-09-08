@@ -64,7 +64,7 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
           type: Boolean,
           value: false,
           notify: true,
-          computed: '_computeHasVariables(variables)'
+          computed: '_computeHasVariables(variables.length)'
         },
         /**
          * Computed value, true if there's a list of environments set.
@@ -73,7 +73,7 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
           type: Boolean,
           value: false,
           notify: true,
-          computed: '_computeHasEnvs(environments)'
+          computed: '_computeHasEnvs(environments.length)'
         }
       };
     }
@@ -184,19 +184,19 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
 
     /**
      * Computes `hasVariables` property.
-     * @param {?Array} variables List of current variables.
+     * @param {Number} length
      * @return {Boolean} True if list is not empty.
      */
-    _computeHasVariables(variables) {
-      return !!(variables && variables.length);
+    _computeHasVariables(length) {
+      return !!length;
     }
     /**
      * Computes `hasEnvironments` property.
-     * @param {?Array} environments List of current environments.
+     * @param {Number} length
      * @return {Boolean} True if list is not empty.
      */
-    _computeHasEnvs(environments) {
-      return !!(environments && environments.length);
+    _computeHasEnvs(length) {
+      return !!length;
     }
     /**
      * Removes variables and updates environment.

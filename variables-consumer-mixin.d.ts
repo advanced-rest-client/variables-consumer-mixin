@@ -80,18 +80,16 @@ declare namespace ArcComponents {
     /**
      * Computes `hasVariables` property.
      *
-     * @param variables List of current variables.
      * @returns True if list is not empty.
      */
-    _computeHasVariables(variables: any[]|null): Boolean|null;
+    _computeHasVariables(length: Number|null): Boolean|null;
 
     /**
      * Computes `hasEnvironments` property.
      *
-     * @param environments List of current environments.
      * @returns True if list is not empty.
      */
-    _computeHasEnvs(environments: any[]|null): Boolean|null;
+    _computeHasEnvs(length: Number|null): Boolean|null;
 
     /**
      * Removes variables and updates environment.

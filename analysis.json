@@ -261,9 +261,8 @@
               "metadata": {},
               "params": [
                 {
-                  "name": "variables",
-                  "type": "?Array",
-                  "description": "List of current variables."
+                  "name": "length",
+                  "type": "Number"
                 }
               ],
               "return": {
@@ -288,9 +287,8 @@
               "metadata": {},
               "params": [
                 {
-                  "name": "environments",
-                  "type": "?Array",
-                  "description": "List of current environments."
+                  "name": "length",
+                  "type": "Number"
                 }
               ],
               "return": {

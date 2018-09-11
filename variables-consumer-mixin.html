@@ -204,6 +204,9 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
      */
     _envChangedHandler(e) {
       const env = e.detail.value;
+      if (env === this.environment) {
+        return;
+      }
       this.set('variables', undefined);
       this.set('environment', env);
     }

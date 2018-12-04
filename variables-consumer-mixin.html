@@ -86,6 +86,8 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
       this._varDeleteHandler = this._varDeleteHandler.bind(this);
       this._envDeleteHandler = this._envDeleteHandler.bind(this);
       this._envUpdateHandler = this._envUpdateHandler.bind(this);
+      this._dataImportHandler = this._dataImportHandler.bind(this);
+      this._onDatabaseDestroy = this._onDatabaseDestroy.bind(this);
     }
 
     connectedCallback() {
@@ -96,6 +98,8 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
       window.addEventListener('variable-deleted', this._varDeleteHandler);
       window.addEventListener('environment-deleted', this._envDeleteHandler);
       window.addEventListener('environment-updated', this._envUpdateHandler);
+      window.addEventListener('data-imported', this._dataImportHandler);
+      window.addEventListener('datastore-destroyed', this._onDatabaseDestroy);
       this._initializeVariables();
       this.refreshEnvironments()
       .catch((cause) => console.error(cause));
@@ -109,6 +113,40 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
       window.removeEventListener('variable-deleted', this._varDeleteHandler);
       window.removeEventListener('environment-deleted', this._envDeleteHandler);
       window.removeEventListener('environment-updated', this._envUpdateHandler);
+      window.removeEventListener('data-imported', this._dataImportHandler);
+      window.removeEventListener('datastore-destroyed', this._onDatabaseDestroy);
+    }
+    /**
+     * Handler for `data-imported` cutom event.
+     * Refreshes environments list.
+     */
+    _dataImportHandler() {
+      this.refreshEnvironments()
+      .catch((cause) => console.error(cause));
+    }
+    /**
+     * Handler for the `datastore-destroyed` custom event.
+     * @param {CustomEvent} e
+     */
+    _onDatabaseDestroy(e) {
+      let datastore = e.detail.datastore;
+      if (!datastore || !datastore.length) {
+        return;
+      }
+      if (typeof datastore === 'string') {
+        datastore = [datastore];
+      }
+      if (datastore.indexOf('variables') === -1 &&
+        datastore.indexOf('variables-environments') === -1 &&
+        datastore[0] !== 'all') {
+        return;
+      }
+      Polymer.RenderStatus.afterNextRender(this, () => {
+        this.environment = undefined;
+        this._initializeVariables();
+        this.refreshEnvironments()
+        .catch((cause) => console.error(cause));
+      });
     }
     /**
      * Asks variables manager for current environment and variables.
@@ -122,6 +160,8 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
         return;
       }
       this.refreshState(true);
+      this.refreshEnvironments()
+      .catch((cause) => console.error(cause));
     }
     /**
      * Refreshes list of variables and current environment.

@@ -154,7 +154,9 @@
 
       test('Event is composed', () => {
         const e = element._dispatch(eName);
-        assert.isTrue(e.composed);
+        if (typeof e.composed !== 'undefined') {
+          assert.isTrue(e.composed);
+        }
       });
 
       test('Event bubbles', () => {

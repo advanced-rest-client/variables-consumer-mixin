@@ -8,6 +8,10 @@
  *   variables-consumer-mixin.html
  */
 
+
+// tslint:disable:variable-name Describing an API that's defined elsewhere.
+// tslint:disable:no-any describes the API as best we are able today
+
 /// <reference path="../polymer/types/lib/utils/mixin.d.ts" />
 /// <reference path="../polymer/types/lib/utils/render-status.d.ts" />
 
@@ -56,13 +60,37 @@ declare namespace ArcComponents {
     disconnectedCallback(): void;
 
     /**
+     * Dispatches bubbling and composed custom event.
+     * By default the event is cancelable until `cancelable` property is set to false.
+     *
+     * @param type Event type
+     * @param detail A detail to set
+     * @param cancelable When false the event is not cancelable.
+     */
+    _dispatch(type: String|null, detail: any|null, cancelable: Boolean|null): CustomEvent|null;
+
+    /**
+     * Handler for `data-imported` cutom event.
+     * Refreshes environments list.
+     */
+    _dataImportHandler(): Promise<any>|null;
+
+    /**
+     * Handler for the `datastore-destroyed` custom event.
+     *
+     * @returns True if scheduled refresh flow.
+     */
+    _onDatabaseDestroy(e: CustomEvent|null): Boolean|null;
+    _initVariables(): any;
+
+    /**
      * Asks variables manager for current environment and variables.
      *
      * Note, At the moment of initialization the manager may not be in the DOM.
      * In this case the initialization fails. However, when the manager is
      * initialized it dispatched events to update variables and environments.
      */
-    _initializeVariables(): void;
+    _initializeVariables(): Promise<any>|null;
 
     /**
      * Refreshes list of variables and current environment.
@@ -76,6 +104,11 @@ declare namespace ArcComponents {
      * Refreshes list of environments.
      */
     refreshEnvironments(): Promise<any>|null;
+
+    /**
+     * Retries environment list refresh after next frame render.
+     */
+    _retryRefreshEnv(): Promise<any>|null;
 
     /**
      * Computes `hasVariables` property.

@@ -144,11 +144,11 @@
               "privacy": "public",
               "sourceRange": {
                 "start": {
-                  "line": 90,
+                  "line": 92,
                   "column": 4
                 },
                 "end": {
-                  "line": 101,
+                  "line": 103,
                   "column": 5
                 }
               },
@@ -164,11 +164,11 @@
               "privacy": "public",
               "sourceRange": {
                 "start": {
-                  "line": 103,
+                  "line": 105,
                   "column": 4
                 },
                 "end": {
-                  "line": 111,
+                  "line": 115,
                   "column": 5
                 }
               },
@@ -179,23 +179,122 @@
               }
             },
             {
-              "name": "_initializeVariables",
-              "description": "Asks variables manager for current environment and variables.\n\nNote, At the moment of initialization the manager may not be in the DOM.\nIn this case the initialization fails. However, when the manager is\ninitialized it dispatched events to update variables and environments.",
+              "name": "_dispatch",
+              "description": "Dispatches bubbling and composed custom event.\nBy default the event is cancelable until `cancelable` property is set to false.",
               "privacy": "protected",
               "sourceRange": {
                 "start": {
-                  "line": 119,
+                  "line": 124,
                   "column": 4
                 },
                 "end": {
-                  "line": 124,
+                  "line": 136,
+                  "column": 5
+                }
+              },
+              "metadata": {},
+              "params": [
+                {
+                  "name": "type",
+                  "type": "String",
+                  "description": "Event type"
+                },
+                {
+                  "name": "detail",
+                  "type": "?any",
+                  "description": "A detail to set"
+                },
+                {
+                  "name": "cancelable",
+                  "type": "?Boolean",
+                  "description": "When false the event is not cancelable."
+                }
+              ],
+              "return": {
+                "type": "CustomEvent"
+              }
+            },
+            {
+              "name": "_dataImportHandler",
+              "description": "Handler for `data-imported` cutom event.\nRefreshes environments list.",
+              "privacy": "protected",
+              "sourceRange": {
+                "start": {
+                  "line": 143,
+                  "column": 4
+                },
+                "end": {
+                  "line": 146,
                   "column": 5
                 }
               },
               "metadata": {},
               "params": [],
               "return": {
-                "type": "void"
+                "type": "Promise"
+              }
+            },
+            {
+              "name": "_onDatabaseDestroy",
+              "description": "Handler for the `datastore-destroyed` custom event.",
+              "privacy": "protected",
+              "sourceRange": {
+                "start": {
+                  "line": 153,
+                  "column": 4
+                },
+                "end": {
+                  "line": 172,
+                  "column": 5
+                }
+              },
+              "metadata": {},
+              "params": [
+                {
+                  "name": "e",
+                  "type": "CustomEvent"
+                }
+              ],
+              "return": {
+                "type": "Boolean",
+                "desc": "True if scheduled refresh flow."
+              }
+            },
+            {
+              "name": "_initVariables",
+              "description": "",
+              "privacy": "protected",
+              "sourceRange": {
+                "start": {
+                  "line": 174,
+                  "column": 4
+                },
+                "end": {
+                  "line": 178,
+                  "column": 5
+                }
+              },
+              "metadata": {},
+              "params": []
+            },
+            {
+              "name": "_initializeVariables",
+              "description": "Asks variables manager for current environment and variables.\n\nNote, At the moment of initialization the manager may not be in the DOM.\nIn this case the initialization fails. However, when the manager is\ninitialized it dispatched events to update variables and environments.",
+              "privacy": "protected",
+              "sourceRange": {
+                "start": {
+                  "line": 187,
+                  "column": 4
+                },
+                "end": {
+                  "line": 194,
+                  "column": 5
+                }
+              },
+              "metadata": {},
+              "params": [],
+              "return": {
+                "type": "Promise"
               }
             },
             {
@@ -204,11 +303,11 @@
               "privacy": "public",
               "sourceRange": {
                 "start": {
-                  "line": 130,
+                  "line": 200,
                   "column": 4
                 },
                 "end": {
-                  "line": 150,
+                  "line": 214,
                   "column": 5
                 }
               },
@@ -230,11 +329,31 @@
               "privacy": "public",
               "sourceRange": {
                 "start": {
-                  "line": 155,
+                  "line": 219,
                   "column": 4
                 },
                 "end": {
-                  "line": 182,
+                  "line": 238,
+                  "column": 5
+                }
+              },
+              "metadata": {},
+              "params": [],
+              "return": {
+                "type": "Promise"
+              }
+            },
+            {
+              "name": "_retryRefreshEnv",
+              "description": "Retries environment list refresh after next frame render.",
+              "privacy": "protected",
+              "sourceRange": {
+                "start": {
+                  "line": 243,
+                  "column": 4
+                },
+                "end": {
+                  "line": 255,
                   "column": 5
                 }
               },
@@ -250,11 +369,11 @@
               "privacy": "protected",
               "sourceRange": {
                 "start": {
-                  "line": 189,
+                  "line": 262,
                   "column": 4
                 },
                 "end": {
-                  "line": 191,
+                  "line": 264,
                   "column": 5
                 }
               },
@@ -276,11 +395,11 @@
               "privacy": "protected",
               "sourceRange": {
                 "start": {
-                  "line": 197,
+                  "line": 270,
                   "column": 4
                 },
                 "end": {
-                  "line": 199,
+                  "line": 272,
                   "column": 5
                 }
               },
@@ -302,11 +421,11 @@
               "privacy": "protected",
               "sourceRange": {
                 "start": {
-                  "line": 204,
+                  "line": 277,
                   "column": 4
                 },
                 "end": {
-                  "line": 208,
+                  "line": 284,
                   "column": 5
                 }
               },
@@ -327,11 +446,11 @@
               "privacy": "protected",
               "sourceRange": {
                 "start": {
-                  "line": 215,
+                  "line": 291,
                   "column": 4
                 },
                 "end": {
-                  "line": 225,
+                  "line": 301,
                   "column": 5
                 }
               },
@@ -352,11 +471,11 @@
               "privacy": "protected",
               "sourceRange": {
                 "start": {
-                  "line": 231,
+                  "line": 307,
                   "column": 4
                 },
                 "end": {
-                  "line": 250,
+                  "line": 326,
                   "column": 5
                 }
               },
@@ -377,11 +496,11 @@
               "privacy": "protected",
               "sourceRange": {
                 "start": {
-                  "line": 256,
+                  "line": 332,
                   "column": 4
                 },
                 "end": {
-                  "line": 266,
+                  "line": 342,
                   "column": 5
                 }
               },
@@ -402,11 +521,11 @@
               "privacy": "protected",
               "sourceRange": {
                 "start": {
-                  "line": 272,
+                  "line": 348,
                   "column": 4
                 },
                 "end": {
-                  "line": 278,
+                  "line": 354,
                   "column": 5
                 }
               },
@@ -429,11 +548,11 @@
               "privacy": "protected",
               "sourceRange": {
                 "start": {
-                  "line": 284,
+                  "line": 360,
                   "column": 4
                 },
                 "end": {
-                  "line": 297,
+                  "line": 373,
                   "column": 5
                 }
               },
@@ -454,11 +573,11 @@
               "privacy": "protected",
               "sourceRange": {
                 "start": {
-                  "line": 303,
+                  "line": 379,
                   "column": 4
                 },
                 "end": {
-                  "line": 320,
+                  "line": 396,
                   "column": 5
                 }
               },
@@ -483,7 +602,7 @@
               "column": 0
             },
             "end": {
-              "line": 323,
+              "line": 399,
               "column": 2
             }
           },

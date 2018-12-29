@@ -29,6 +29,25 @@
       });
     }
 
+    function rejectEnvironmentList() {
+      window.addEventListener('environment-list', function f(e) {
+        window.removeEventListener('environment-list', f);
+        e.preventDefault();
+        e.detail.result = Promise.reject(new Error('test'));
+      });
+    }
+
+    function noopEnvironmentCurrent() {
+      window.addEventListener('environment-current', function f(e) {
+        window.removeEventListener('environment-current', f);
+        e.preventDefault();
+        e.detail.result = Promise.resolve({
+          environment: '',
+          variables: []
+        });
+      });
+    }
+
     suite('Initialization flow', () => {
       test('Asks for current environment', () => {
         noopEnvironmentList();
@@ -96,23 +115,217 @@
         });
       });
 
-      test('refreshEnvironments() repets event when no model', (done) => {
-        noopEnvironmentList();
-        const element = fixture('Basic');
-        element.refreshEnvironments()
-        .then(() => {
-          done();
-        });
-        noopEnvironmentList();
+      // test('refreshEnvironments() repets event when no model', (done) => {
+      //   const element = fixture('Basic');
+      //   element._retryingModel = false;
+      //   element.refreshEnvironments()
+      //   .then(() => {
+      //     done();
+      //   });
+      //   noopEnvironmentList();
+      // });
+    });
+
+    suite('_dispatch()', () => {
+      let element;
+      setup(() => {
+        element = fixture('Basic');
+      });
+
+      const eName = 'test-event';
+      const eDetail = 'test-detail';
+
+      test('Dispatches an event', () => {
+        const spy = sinon.spy();
+        element.addEventListener(eName, spy);
+        element._dispatch(eName);
+        assert.isTrue(spy.called);
+      });
+
+      test('Returns the event', () => {
+        const e = element._dispatch(eName);
+        assert.typeOf(e, 'customevent');
+      });
+
+      test('Event is cancelable by default', () => {
+        const e = element._dispatch(eName);
+        assert.isTrue(e.cancelable);
+      });
+
+      test('Event is composed', () => {
+        const e = element._dispatch(eName);
+        assert.isTrue(e.composed);
+      });
+
+      test('Event bubbles', () => {
+        const e = element._dispatch(eName);
+        assert.isTrue(e.bubbles);
+      });
+
+      test('Event is not cancelable when set', () => {
+        const e = element._dispatch(eName, eDetail, false);
+        assert.isFalse(e.cancelable);
+      });
+
+      test('Event has detail', () => {
+        const e = element._dispatch(eName, eDetail);
+        assert.equal(e.detail, eDetail);
       });
     });
 
-    function fire(type, detail) {
+    suite('_initializeVariables()', () => {
+      let element;
+      setup(() => {
+        element = fixture('Basic');
+      });
+
+      test('Does nothing when environment is set', () => {
+        const spy = sinon.spy(element, 'refreshState');
+        element.environment = 'test';
+        element._initializeVariables();
+        assert.isFalse(spy.called);
+      });
+
+      test('Calls refreshState()', () => {
+        noopEnvironmentList();
+        noopEnvironmentCurrent();
+        const spy = sinon.spy(element, 'refreshState');
+        element._initializeVariables();
+        assert.isTrue(spy.called);
+      });
+
+      test('Calls refreshEnvironments()', () => {
+        noopEnvironmentList();
+        noopEnvironmentCurrent();
+        const spy = sinon.spy(element, 'refreshEnvironments');
+        element._initializeVariables();
+        assert.isTrue(spy.called);
+      });
+
+      test('Handles promise rejection', () => {
+        rejectEnvironmentList();
+        return element._dataImportHandler();
+      });
+    });
+
+    suite('_dataImportHandler()', () => {
+      let element;
+      setup(() => {
+        element = fixture('Basic');
+      });
+
+      test('Calls refreshEnvironments()', () => {
+        noopEnvironmentList();
+        const spy = sinon.spy(element, 'refreshEnvironments');
+        element._dataImportHandler();
+        assert.isTrue(spy.called);
+      });
+
+      test('Handles promise rejection', () => {
+        rejectEnvironmentList();
+        return element._dataImportHandler();
+      });
+    });
+
+    suite('_onDatabaseDestroy()', () => {
+      let element;
+      setup(() => {
+        noopEnvironmentList();
+        noopEnvironmentCurrent();
+        element = fixture('Basic');
+      });
+
+      test('Does noting when no datastore property', () => {
+        const result = element._onDatabaseDestroy({detail: {}});
+        assert.isFalse(result);
+      });
+
+      test('Does noting when empty datastore property', () => {
+        const result = element._onDatabaseDestroy({detail: {
+          datastore: []
+        }});
+        assert.isFalse(result);
+      });
+
+      test('Does noting when other datastore', () => {
+        const result = element._onDatabaseDestroy({detail: {
+          datastore: ['other']
+        }});
+        assert.isFalse(result);
+      });
+
+      test('Schedules refresh when "variables" datastore', () => {
+        const result = element._onDatabaseDestroy({detail: {
+          datastore: ['variables']
+        }});
+        assert.isTrue(result);
+      });
+
+      test('Schedules refresh when datastore is string', () => {
+        const result = element._onDatabaseDestroy({detail: {
+          datastore: 'variables'
+        }});
+        assert.isTrue(result);
+      });
+
+      test('Schedules refresh when "variables-environments" store', () => {
+        const result = element._onDatabaseDestroy({detail: {
+          datastore: 'variables-environments'
+        }});
+        assert.isTrue(result);
+      });
+
+      test('Schedules refresh when "all" store', () => {
+        const result = element._onDatabaseDestroy({detail: {
+          datastore: 'all'
+        }});
+        assert.isTrue(result);
+      });
+
+      test('Eventually resets "environment"', (done) => {
+        element._onDatabaseDestroy({detail: {
+          datastore: 'all'
+        }});
+        Polymer.RenderStatus.afterNextRender(element, () => {
+          assert.isUndefined(element.environment);
+          done();
+        });
+      });
+
+      test('Eventually calls refreshState()', (done) => {
+        element._onDatabaseDestroy({detail: {
+          datastore: 'all'
+        }});
+        noopEnvironmentList();
+        noopEnvironmentCurrent();
+        const spy = sinon.spy(element, 'refreshState');
+        Polymer.RenderStatus.afterNextRender(element, () => {
+          assert.isTrue(spy.called);
+          done();
+        });
+      });
+
+      test('Eventually calls _initVariables()', (done) => {
+        element._onDatabaseDestroy({detail: {
+          datastore: 'all'
+        }});
+        noopEnvironmentList();
+        noopEnvironmentCurrent();
+        const spy = sinon.spy(element, '_initVariables');
+        Polymer.RenderStatus.afterNextRender(element, () => {
+          assert.isTrue(spy.called);
+          done();
+        });
+      });
+    });
+
+    function fire(type, detail, cancelable) {
       if (!detail) {
         detail = {};
       }
       const e = new CustomEvent(type, {
         bubbles: true,
+        cancelable,
         detail
       });
       document.body.dispatchEvent(e);
@@ -130,6 +343,15 @@
           value: 'test'
         });
         assert.equal(element.environment, 'test');
+      });
+
+      test('Does nothing when the same environment', function() {
+        element.environment = 'test';
+        element.variables = [];
+        fire('selected-environment-changed', {
+          value: 'test'
+        });
+        assert.typeOf(element.variables, 'array');
       });
 
       test('Clears variables', function() {
@@ -163,6 +385,13 @@
         });
         items[0]._id = 3;
         assert.equal(element.variables[0]._id, 1);
+      });
+
+      test('Does nothing if event is cancelable', function() {
+        fire('variables-list-changed', {
+          value: items
+        }, true);
+        assert.isUndefined(element.variables);
       });
     });
 
@@ -218,6 +447,14 @@
         });
         assert.deepEqual(element.variables[0], item);
       });
+
+      test('Does nothing if event is cancelable', function() {
+        const item = Object.assign({}, items[0]);
+        fire('variable-updated', {
+          value: item
+        }, true);
+        assert.isUndefined(element.variables);
+      });
     });
 
     suite('variable-deleted', function() {
@@ -245,6 +482,13 @@
         assert.equal(element.variables[0]._id, 'a');
         assert.equal(element.variables[1]._id, 'c');
       });
+
+      test('Does nothing when event is cancelable', function() {
+        fire('variable-deleted', {
+          id: 'b'
+        }, true);
+        assert.lengthOf(element.variables, 3);
+      });
     });
 
     suite('environment-deleted', function() {
@@ -271,6 +515,20 @@
         assert.lengthOf(element.environments, 2);
         assert.equal(element.environments[0]._id, 'a');
         assert.equal(element.environments[1]._id, 'c');
+      });
+
+      test('Does nothing when event is cancelable', function() {
+        fire('environment-deleted', {
+          id: 'b'
+        }, true);
+        assert.lengthOf(element.environments, 3);
+      });
+
+      test('Does nothing when environments are not set', function() {
+        element.environments = undefined;
+        fire('environment-deleted', {
+          id: 'b'
+        });
       });
     });
 
@@ -312,6 +570,16 @@
           value: item
         });
         assert.deepEqual(element.environments[0], item);
+      });
+
+      test('Does nothing when event is cancelable', () => {
+        element.environments = items;
+        const item = Object.assign({}, items[0]);
+        item.name = 'c';
+        fire('environment-updated', {
+          value: item
+        }, true);
+        assert.deepEqual(element.environments, items);
       });
     });
 

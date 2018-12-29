@@ -100,9 +100,7 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
       window.addEventListener('environment-updated', this._envUpdateHandler);
       window.addEventListener('data-imported', this._dataImportHandler);
       window.addEventListener('datastore-destroyed', this._onDatabaseDestroy);
-      this._initializeVariables();
-      this.refreshEnvironments()
-      .catch((cause) => console.error(cause));
+      this._initVariables();
     }
 
     disconnectedCallback() {
@@ -117,21 +115,46 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
       window.removeEventListener('datastore-destroyed', this._onDatabaseDestroy);
     }
     /**
+     * Dispatches bubbling and composed custom event.
+     * By default the event is cancelable until `cancelable` property is set to false.
+     * @param {String} type Event type
+     * @param {?any} detail A detail to set
+     * @param {?Boolean} cancelable When false the event is not cancelable.
+     * @return {CustomEvent}
+     */
+    _dispatch(type, detail, cancelable) {
+      if (typeof cancelable !== 'boolean') {
+        cancelable = true;
+      }
+      const e = new CustomEvent(type, {
+        bubbles: true,
+        composed: true,
+        cancelable,
+        detail
+      });
+      this.dispatchEvent(e);
+      return e;
+    }
+    /**
      * Handler for `data-imported` cutom event.
      * Refreshes environments list.
+     *
+     * @return {Promise}
      */
     _dataImportHandler() {
-      this.refreshEnvironments()
-      .catch((cause) => console.error(cause));
+      return this.refreshEnvironments()
+      .catch((cause) => console.warn(cause));
     }
     /**
      * Handler for the `datastore-destroyed` custom event.
+     *
      * @param {CustomEvent} e
+     * @return {Boolean} True if scheduled refresh flow.
      */
     _onDatabaseDestroy(e) {
-      let datastore = e.detail.datastore;
+      let {datastore} = e.detail;
       if (!datastore || !datastore.length) {
-        return;
+        return false;
       }
       if (typeof datastore === 'string') {
         datastore = [datastore];
@@ -139,14 +162,20 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
       if (datastore.indexOf('variables') === -1 &&
         datastore.indexOf('variables-environments') === -1 &&
         datastore[0] !== 'all') {
-        return;
+        return false;
       }
       Polymer.RenderStatus.afterNextRender(this, () => {
         this.environment = undefined;
-        this._initializeVariables();
-        this.refreshEnvironments()
-        .catch((cause) => console.error(cause));
+        this.refreshState();
+        this._initVariables();
       });
+      return true;
+    }
+
+    _initVariables() {
+      this._initializeVariables();
+      return this.refreshEnvironments()
+      .catch((cause) => console.warn(cause));
     }
     /**
      * Asks variables manager for current environment and variables.
@@ -154,14 +183,15 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
      * Note, At the moment of initialization the manager may not be in the DOM.
      * In this case the initialization fails. However, when the manager is
      * initialized it dispatched events to update variables and environments.
+     * @return {Promise}
      */
     _initializeVariables() {
       if (this.environment) {
         return;
       }
       this.refreshState(true);
-      this.refreshEnvironments()
-      .catch((cause) => console.error(cause));
+      return this.refreshEnvironments()
+      .catch((cause) => console.warn(cause));
     }
     /**
      * Refreshes list of variables and current environment.
@@ -169,13 +199,7 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
      * not found.
      */
     refreshState(noThrows) {
-      const e = new CustomEvent('environment-current', {
-        cancelable: true,
-        composed: true,
-        bubbles: true,
-        detail: {}
-      });
-      this.dispatchEvent(e);
+      const e = this._dispatch('environment-current', {});
       if (!e.defaultPrevented) {
         if (noThrows) {
           // The manager is still initializing. It dispatches `selected-environment-changed`
@@ -194,31 +218,40 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
      * @return {Promise}
      */
     refreshEnvironments() {
-      const e = new CustomEvent('environment-list', {
-        cancelable: true,
-        composed: true,
-        bubbles: true,
-        detail: {}
-      });
-      this.dispatchEvent(e);
+      const e = this._dispatch('environment-list', {});
       if (!e.defaultPrevented) {
-        if (this._retryingModel) {
-          return Promise.reject(new Error('Variables model not found'));
-        }
-        this._retryingModel = true;
-        return new Promise((resolve, reject) => {
-          Polymer.RenderStatus.afterNextRender(this, () => {
-            this.refreshEnvironments()
-            .then((data) => resolve(data))
-            .catch((cause) => reject(cause));
-          });
-        });
+        return this._retryRefreshEnv();
       }
-
       return e.detail.result
       .then((environments) => {
+        if (this._retryingModel) {
+          this._retryingModel = false;
+        }
         this.set('environments', environments);
         return environments;
+      })
+      .catch((cause) => {
+        if (this._retryingModel) {
+          this._retryingModel = false;
+        }
+        throw cause;
+      });
+    }
+    /**
+     * Retries environment list refresh after next frame render.
+     * @return {Promise}
+     */
+    _retryRefreshEnv() {
+      if (this._retryingModel) {
+        return Promise.reject(new Error('Variables model not found'));
+      }
+      this._retryingModel = true;
+      return new Promise((resolve, reject) => {
+        Polymer.RenderStatus.afterNextRender(this, () => {
+          this.refreshEnvironments()
+          .then((data) => resolve(data))
+          .catch((cause) => reject(cause));
+        });
       });
     }
 

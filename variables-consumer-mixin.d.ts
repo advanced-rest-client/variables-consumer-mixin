@@ -5,15 +5,14 @@
  *   https://github.com/Polymer/tools/tree/master/packages/gen-typescript-declarations
  *
  * To modify these typings, edit the source file(s):
- *   variables-consumer-mixin.html
+ *   variables-consumer-mixin.js
  */
 
 
 // tslint:disable:variable-name Describing an API that's defined elsewhere.
 // tslint:disable:no-any describes the API as best we are able today
 
-/// <reference path="../polymer/types/lib/utils/mixin.d.ts" />
-/// <reference path="../polymer/types/lib/utils/render-status.d.ts" />
+export {VariablesConsumerMixin};
 
 declare namespace ArcComponents {
 
@@ -56,6 +55,12 @@ declare namespace ArcComponents {
      * Computed value, true if there's a list of environments set.
      */
     readonly hasEnvironments: boolean|null|undefined;
+
+    /**
+     * When set variables are not set automatically when element
+     * is attached to the DOM.
+     */
+    noAuthoLoad: boolean|null|undefined;
     connectedCallback(): void;
     disconnectedCallback(): void;
 
@@ -81,7 +86,6 @@ declare namespace ArcComponents {
      * @returns True if scheduled refresh flow.
      */
     _onDatabaseDestroy(e: CustomEvent|null): Boolean|null;
-    _initVariables(): any;
 
     /**
      * Asks variables manager for current environment and variables.
@@ -104,11 +108,6 @@ declare namespace ArcComponents {
      * Refreshes list of environments.
      */
     refreshEnvironments(): Promise<any>|null;
-
-    /**
-     * Retries environment list refresh after next frame render.
-     */
-    _retryRefreshEnv(): Promise<any>|null;
 
     /**
      * Computes `hasVariables` property.
@@ -168,3 +167,5 @@ declare namespace ArcComponents {
     _envUpdateHandler(e: CustomEvent|null): void;
   }
 }
+
+export {VariablesConsumerMixinConstructor};

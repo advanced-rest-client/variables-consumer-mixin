@@ -97,7 +97,7 @@ export const VariablesConsumerMixin = dedupingMixin((base) => {
       window.addEventListener('data-imported', this._dataImportHandler);
       window.addEventListener('datastore-destroyed', this._onDatabaseDestroy);
       if (!this.noAuthoLoad) {
-        this._initVariables();
+        this._initializeVariables();
       }
     }
 
@@ -165,15 +165,9 @@ export const VariablesConsumerMixin = dedupingMixin((base) => {
       afterNextRender(this, () => {
         this.environment = undefined;
         this.refreshState();
-        this._initVariables();
+        this._initializeVariables();
       });
       return true;
-    }
-
-    _initVariables() {
-      this._initializeVariables();
-      return this.refreshEnvironments()
-      .catch((cause) => console.warn(cause));
     }
     /**
      * Asks variables manager for current environment and variables.
@@ -206,6 +200,7 @@ export const VariablesConsumerMixin = dedupingMixin((base) => {
           // way to tell...
           return;
         }
+        console.warn('refreshState() - variables model not found');
         throw new Error('Variables model not found');
       }
       this.set('environment', e.detail.environment);
@@ -218,41 +213,15 @@ export const VariablesConsumerMixin = dedupingMixin((base) => {
     refreshEnvironments() {
       const e = this._dispatch('environment-list', {});
       if (!e.defaultPrevented) {
-        return this._retryRefreshEnv();
+        console.warn('refreshEnvironments()::Missing model');
+        return Promise.reject(new Error('Variables model not found'));
       }
       return e.detail.result
       .then((environments) => {
-        if (this._retryingModel) {
-          this._retryingModel = false;
-        }
         this.set('environments', environments);
         return environments;
-      })
-      .catch((cause) => {
-        if (this._retryingModel) {
-          this._retryingModel = false;
-        }
-        throw cause;
       });
     }
-    /**
-     * Retries environment list refresh after next frame render.
-     * @return {Promise}
-     */
-    _retryRefreshEnv() {
-      if (this._retryingModel) {
-        return Promise.reject(new Error('Variables model not found'));
-      }
-      this._retryingModel = true;
-      return new Promise((resolve, reject) => {
-        afterNextRender(this, () => {
-          this.refreshEnvironments()
-          .then((data) => resolve(data))
-          .catch((cause) => reject(cause));
-        });
-      });
-    }
-
     /**
      * Computes `hasVariables` property.
      * @param {Number} length

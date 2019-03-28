@@ -19,6 +19,12 @@
     </template>
   </test-fixture>
 
+  <test-fixture id="NoAuthoLoad">
+    <template>
+      <vars-consumer no-autho-load></vars-consumer>
+    </template>
+  </test-fixture>
+
   <script type="module">
   import './vars-consumer.js';
   import {afterNextRender} from '../../../@polymer/polymer/lib/utils/render-status.js';
@@ -121,22 +127,12 @@
           done();
         });
       });
-
-      // test('refreshEnvironments() repets event when no model', (done) => {
-      //   const element = fixture('Basic');
-      //   element._retryingModel = false;
-      //   element.refreshEnvironments()
-      //   .then(() => {
-      //     done();
-      //   });
-      //   noopEnvironmentList();
-      // });
     });
 
     suite('_dispatch()', () => {
       let element;
       setup(() => {
-        element = fixture('Basic');
+        element = fixture('NoAuthoLoad');
       });
 
       const eName = 'test-event';
@@ -185,7 +181,7 @@
     suite('_initializeVariables()', () => {
       let element;
       setup(() => {
-        element = fixture('Basic');
+        element = fixture('NoAuthoLoad');
       });
 
       test('Does nothing when environment is set', () => {
@@ -220,7 +216,7 @@
     suite('_dataImportHandler()', () => {
       let element;
       setup(() => {
-        element = fixture('Basic');
+        element = fixture('NoAuthoLoad');
       });
 
       test('Calls refreshEnvironments()', () => {
@@ -242,12 +238,10 @@
         noopEnvironmentList();
         noopEnvironmentCurrent();
 
-        element = fixture('Basic');
+        element = fixture('NoAuthoLoad');
       });
 
       test('Does noting when no datastore property', () => {
-        noopEnvironmentList();
-        noopEnvironmentCurrent();
         const result = element._onDatabaseDestroy({detail: {}});
         assert.isFalse(result);
       });
@@ -266,32 +260,44 @@
         assert.isFalse(result);
       });
 
-      test('Schedules refresh when "variables" datastore', () => {
+      test('Schedules refresh when "variables" datastore', (done) => {
         const result = element._onDatabaseDestroy({detail: {
           datastore: ['variables']
         }});
-        assert.isTrue(result);
+        afterNextRender(element, () => {
+          assert.isTrue(result);
+          done();
+        });
       });
 
-      test('Schedules refresh when datastore is string', () => {
+      test('Schedules refresh when datastore is string', (done) => {
         const result = element._onDatabaseDestroy({detail: {
           datastore: 'variables'
         }});
-        assert.isTrue(result);
+        afterNextRender(element, () => {
+          assert.isTrue(result);
+          done();
+        });
       });
 
-      test('Schedules refresh when "variables-environments" store', () => {
+      test('Schedules refresh when "variables-environments" store', (done) => {
         const result = element._onDatabaseDestroy({detail: {
           datastore: 'variables-environments'
         }});
-        assert.isTrue(result);
+        afterNextRender(element, () => {
+          assert.isTrue(result);
+          done();
+        });
       });
 
-      test('Schedules refresh when "all" store', () => {
+      test('Schedules refresh when "all" store', (done) => {
         const result = element._onDatabaseDestroy({detail: {
           datastore: 'all'
         }});
-        assert.isTrue(result);
+        afterNextRender(element, () => {
+          assert.isTrue(result);
+          done();
+        });
       });
 
       test('Eventually resets "environment"', (done) => {
@@ -317,13 +323,13 @@
         });
       });
 
-      test('Eventually calls _initVariables()', (done) => {
+      test('Eventually calls _initializeVariables()', (done) => {
         element._onDatabaseDestroy({detail: {
           datastore: 'all'
         }});
         noopEnvironmentList();
         noopEnvironmentCurrent();
-        const spy = sinon.spy(element, '_initVariables');
+        const spy = sinon.spy(element, '_initializeVariables');
         afterNextRender(element, () => {
           assert.isTrue(spy.called);
           done();

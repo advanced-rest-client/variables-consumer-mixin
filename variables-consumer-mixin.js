@@ -1,4 +1,4 @@
-<!--
+/**
 @license
 Copyright 2018 The Advanced REST client authors <arc@mulesoft.com>
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -10,18 +10,9 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations under
 the License.
--->
-<link rel="import" href="../polymer/lib/utils/mixin.html">
-<link rel="import" href="../polymer/lib/utils/render-status.html">
-<script>
-(function(global) {
-'use strict';
-if (!global.ArcComponents) {
-  /**
-   * @namespace ArcComponents
-   */
-  global.ArcComponents = {};
-}
+*/
+import {dedupingMixin} from '../../@polymer/polymer/lib/utils/mixin.js';
+import {afterNextRender} from '../../@polymer/polymer/lib/utils/render-status.js';
 /**
  * A mixin to be used with elements that consumes variables and environments
  * state. Contains all methods and listeners to kee variables and environments
@@ -31,7 +22,7 @@ if (!global.ArcComponents) {
  * @mixinFunction
  * @memberof ArcComponents
  */
-global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
+export const VariablesConsumerMixin = dedupingMixin((base) => {
   /**
    * @polymer
    * @mixinClass
@@ -74,7 +65,12 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
           value: false,
           notify: true,
           computed: '_computeHasEnvs(environments.length)'
-        }
+        },
+        /**
+         * When set variables are not set automatically when element
+         * is attached to the DOM.
+         */
+        noAuthoLoad: Boolean
       };
     }
 
@@ -100,7 +96,9 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
       window.addEventListener('environment-updated', this._envUpdateHandler);
       window.addEventListener('data-imported', this._dataImportHandler);
       window.addEventListener('datastore-destroyed', this._onDatabaseDestroy);
-      this._initVariables();
+      if (!this.noAuthoLoad) {
+        this._initVariables();
+      }
     }
 
     disconnectedCallback() {
@@ -164,7 +162,7 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
         datastore[0] !== 'all') {
         return false;
       }
-      Polymer.RenderStatus.afterNextRender(this, () => {
+      afterNextRender(this, () => {
         this.environment = undefined;
         this.refreshState();
         this._initVariables();
@@ -187,7 +185,7 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
      */
     _initializeVariables() {
       if (this.environment) {
-        return;
+        return Promise.resolve();
       }
       this.refreshState(true);
       return this.refreshEnvironments()
@@ -247,7 +245,7 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
       }
       this._retryingModel = true;
       return new Promise((resolve, reject) => {
-        Polymer.RenderStatus.afterNextRender(this, () => {
+        afterNextRender(this, () => {
           this.refreshEnvironments()
           .then((data) => resolve(data))
           .catch((cause) => reject(cause));
@@ -398,6 +396,3 @@ global.ArcComponents.VariablesConsumerMixin = Polymer.dedupingMixin((base) => {
   }
   return AVCmixin;
 });
-})(window);
-</script>
-</dom-module>

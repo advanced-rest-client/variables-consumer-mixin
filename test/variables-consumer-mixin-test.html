@@ -4,9 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
   <title>variables-consumer-mixin test</title>
-  <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
-  <script src="../../web-component-tester/browser.js"></script>
-  <link rel="import" href="vars-consumer.html">
+
+  <script src="../../../@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../../@polymer/test-fixture/test-fixture.js"></script>
+  <script src="../../../mocha/mocha.js"></script>
+  <script src="../../../chai/chai.js"></script>
+  <script src="../../../wct-mocha/wct-mocha.js"></script>
+
 </head>
 <body>
   <test-fixture id="Basic">
@@ -15,7 +19,10 @@
     </template>
   </test-fixture>
 
-  <script>
+  <script type="module">
+  import './vars-consumer.js';
+  import {afterNextRender} from '../../../@polymer/polymer/lib/utils/render-status.js';
+  import sinon from '../../../sinon/pkg/sinon-esm.js';
   suite('variables-consumer-mixin', () => {
     function noopEvent(e) {
       e.preventDefault();
@@ -234,10 +241,13 @@
       setup(() => {
         noopEnvironmentList();
         noopEnvironmentCurrent();
+
         element = fixture('Basic');
       });
 
       test('Does noting when no datastore property', () => {
+        noopEnvironmentList();
+        noopEnvironmentCurrent();
         const result = element._onDatabaseDestroy({detail: {}});
         assert.isFalse(result);
       });
@@ -288,7 +298,7 @@
         element._onDatabaseDestroy({detail: {
           datastore: 'all'
         }});
-        Polymer.RenderStatus.afterNextRender(element, () => {
+        afterNextRender(element, () => {
           assert.isUndefined(element.environment);
           done();
         });
@@ -301,7 +311,7 @@
         noopEnvironmentList();
         noopEnvironmentCurrent();
         const spy = sinon.spy(element, 'refreshState');
-        Polymer.RenderStatus.afterNextRender(element, () => {
+        afterNextRender(element, () => {
           assert.isTrue(spy.called);
           done();
         });
@@ -314,7 +324,7 @@
         noopEnvironmentList();
         noopEnvironmentCurrent();
         const spy = sinon.spy(element, '_initVariables');
-        Polymer.RenderStatus.afterNextRender(element, () => {
+        afterNextRender(element, () => {
           assert.isTrue(spy.called);
           done();
         });

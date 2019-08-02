@@ -35,3 +35,13 @@
 
 
 
+## [3.0.2](https://github.com/advanced-rest-client/variables-consumer-mixin/compare/2.0.0...3.0.2) (2019-08-02)
+
+
+### Bug Fixes
+
+* fixes [#2](https://github.com/advanced-rest-client/variables-consumer-mixin/issues/2) - sorting variables alphabetically ([8463e88](https://github.com/advanced-rest-client/variables-consumer-mixin/commit/8463e88))
+* fixing refresing state after database destroy action ([2b66857](https://github.com/advanced-rest-client/variables-consumer-mixin/commit/2b66857))
+
+
+

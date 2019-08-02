@@ -37,10 +37,8 @@ describe('VariablesConsumerMixin', function() {
     window.addEventListener('environment-current', function f(e) {
       window.removeEventListener('environment-current', f);
       e.preventDefault();
-      e.detail.result = Promise.resolve({
-        environment: '',
-        variables: []
-      });
+      e.detail.environment = '';
+      e.detail.variables = [];
     });
   }
 
@@ -648,6 +646,245 @@ describe('VariablesConsumerMixin', function() {
         }
       ];
       assert.isTrue(element.hasEnvironments);
+    });
+  });
+
+  describe('refreshState()', () => {
+    function currentHandler(element, vars) {
+      element.addEventListener('environment-current', function f(e) {
+        element.removeEventListener('environment-current', f);
+        e.preventDefault();
+        e.detail.environment = 'test';
+        e.detail.variables = vars;
+      });
+    }
+
+    let vars;
+    let element;
+    beforeEach(async () => {
+      element = await noAuthoLoadFixture();
+      vars = [
+        {
+          _id: 'swing',
+          variable: 'swing',
+          environment: 'test'
+        },
+        {
+          _id: 'deal',
+          variable: 'deal',
+          environment: 'test'
+        },
+        {
+          _id: 'shrink',
+          variable: 'shrink',
+          environment: 'test'
+        },
+        {
+          _id: 'terminate',
+          variable: 'terminate',
+          environment: 'test'
+        },
+        {
+          _id: 'imprint',
+          variable: 'imprint',
+          environment: 'test'
+        }
+      ];
+    });
+
+    it('sets the environment', () => {
+      currentHandler(element, vars);
+      element.refreshState();
+      assert.equal(element.environment, 'test');
+    });
+
+    it('sets variables', () => {
+      currentHandler(element, vars);
+      element.refreshState();
+      assert.lengthOf(element.variables, 5);
+    });
+
+    it('sorts the array', () => {
+      currentHandler(element, vars);
+      element.refreshState();
+      assert.equal(element.variables[0].variable, 'deal');
+      assert.equal(element.variables[1].variable, 'imprint');
+      assert.equal(element.variables[2].variable, 'shrink');
+      assert.equal(element.variables[3].variable, 'swing');
+      assert.equal(element.variables[4].variable, 'terminate');
+    });
+
+    it('ignores non array variables', () => {
+      currentHandler(element, 'test');
+      element.refreshState();
+      assert.typeOf(element.variables, 'array');
+      assert.lengthOf(element.variables, 0);
+    });
+
+    it('does nothing when event not handled', () => {
+      element.refreshState();
+      assert.isUndefined(element.environment);
+      assert.isUndefined(element.variables);
+    });
+
+    it('makes a copy of the array', () => {
+      currentHandler(element, vars);
+      element.refreshState();
+      assert.equal(vars[0].variable, 'swing');
+    });
+  });
+
+  describe('_varListChangedHandler()', () => {
+    function fire(value, cancelable) {
+      if (cancelable === undefined) {
+        cancelable = false;
+      }
+      const e = new CustomEvent('variables-list-changed', {
+        bubbles: true,
+        cancelable,
+        detail: {
+          value
+        }
+      });
+      document.body.dispatchEvent(e);
+    }
+
+    let vars;
+    let element;
+    beforeEach(async () => {
+      element = await noAuthoLoadFixture();
+      vars = [
+        {
+          _id: 'swing',
+          variable: 'swing',
+          environment: 'test'
+        },
+        {
+          _id: 'deal',
+          variable: 'deal',
+          environment: 'test'
+        },
+        {
+          _id: 'shrink',
+          variable: 'shrink',
+          environment: 'test'
+        },
+        {
+          _id: 'terminate',
+          variable: 'terminate',
+          environment: 'test'
+        },
+        {
+          _id: 'imprint',
+          variable: 'imprint',
+          environment: 'test'
+        }
+      ];
+    });
+
+    it('sets variables', () => {
+      fire(vars);
+      assert.lengthOf(element.variables, 5);
+    });
+
+    it('sorts the array', () => {
+      fire(vars);
+      assert.equal(element.variables[0].variable, 'deal');
+      assert.equal(element.variables[1].variable, 'imprint');
+      assert.equal(element.variables[2].variable, 'shrink');
+      assert.equal(element.variables[3].variable, 'swing');
+      assert.equal(element.variables[4].variable, 'terminate');
+    });
+
+    it('creates a copy of array item', () => {
+      fire(vars);
+      vars[0].variable = 'xxxxx';
+      assert.equal(element.variables[3].variable, 'swing');
+    });
+
+    it('ignores cancelable events', () => {
+      fire(vars, true);
+      assert.isUndefined(element.variables);
+    });
+  });
+
+  describe('_varUpdateHandler()', () => {
+    function fire(value, cancelable) {
+      if (cancelable === undefined) {
+        cancelable = false;
+      }
+      const e = new CustomEvent('variable-updated', {
+        bubbles: true,
+        cancelable,
+        detail: {
+          value
+        }
+      });
+      document.body.dispatchEvent(e);
+    }
+
+    let vars;
+    let element;
+    beforeEach(async () => {
+      element = await noAuthoLoadFixture();
+      vars = [
+        {
+          _id: 'swing',
+          variable: 'swing',
+          environment: 'test'
+        },
+        {
+          _id: 'deal',
+          variable: 'deal',
+          environment: 'test'
+        },
+        {
+          _id: 'shrink',
+          variable: 'shrink',
+          environment: 'test'
+        },
+        {
+          _id: 'terminate',
+          variable: 'terminate',
+          environment: 'test'
+        },
+        {
+          _id: 'imprint',
+          variable: 'imprint',
+          environment: 'test'
+        }
+      ];
+      element.variables = vars;
+      element.environment = 'test';
+    });
+
+    it('creates new array', () => {
+      element.variables = undefined;
+      fire(vars[0]);
+      assert.lengthOf(element.variables, 1);
+    });
+
+    it('adds new item and sorts them', () => {
+      fire({
+        _id: 'aaa',
+        variable: 'aaa',
+        environment: 'test'
+      });
+      assert.lengthOf(element.variables, 6);
+      assert.equal(element.variables[0].variable, 'aaa');
+    });
+
+    it('updates existing and sorts them', () => {
+      const item = Object.assign({}, vars[1]); // deal
+      item.variable = 'zzz';
+      fire(item);
+      assert.equal(element.variables[4].variable, 'zzz');
+    });
+
+    it('ignores cancelable events', () => {
+      element.variables = undefined;
+      fire(vars[0], true);
+      assert.isUndefined(element.variables);
     });
   });
 });

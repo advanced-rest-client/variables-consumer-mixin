@@ -22,3 +22,7 @@
 
 
 
+# [3.0.0](https://github.com/advanced-rest-client/variables-consumer-mixin/compare/2.0.0...3.0.0) (2019-08-02)
+
+
+

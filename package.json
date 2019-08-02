@@ -1,7 +1,7 @@
 {
   "name": "@advanced-rest-client/variables-consumer-mixin",
   "description": "Mixin to be used by elements that consumes variables",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "license": "Apache-2.0",
   "main": "variables-consumer-mixin.js",
   "keywords": [

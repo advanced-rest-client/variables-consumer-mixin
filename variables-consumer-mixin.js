@@ -223,12 +223,13 @@ export const VariablesConsumerMixin = (base) => class extends base {
       datastore[0] !== 'all') {
       return false;
     }
-    setTimeout(() => {
-      this.environment = undefined;
-      this.refreshState();
-      this._initializeVariables();
-    });
+    setTimeout(() => this._resetAfterDestroyed());
     return true;
+  }
+
+  async _resetAfterDestroyed() {
+    this.environment = undefined;
+    await this._initializeVariables();
   }
   /**
    * Asks variables manager for current environment and variables.

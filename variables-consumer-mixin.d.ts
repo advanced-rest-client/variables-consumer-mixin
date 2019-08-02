@@ -5,15 +5,14 @@
  *   https://github.com/Polymer/tools/tree/master/packages/gen-typescript-declarations
  *
  * To modify these typings, edit the source file(s):
- *   variables-consumer-mixin.html
+ *   variables-consumer-mixin.js
  */
 
 
 // tslint:disable:variable-name Describing an API that's defined elsewhere.
 // tslint:disable:no-any describes the API as best we are able today
 
-/// <reference path="../polymer/types/lib/utils/mixin.d.ts" />
-/// <reference path="../polymer/types/lib/utils/render-status.d.ts" />
+export {VariablesConsumerMixin};
 
 declare namespace ArcComponents {
 
@@ -45,17 +44,25 @@ declare namespace ArcComponents {
      * List of available variables for the environment.
      */
     variables: Array<object|null>|null;
+    readonly hasVariables: any;
+    readonly hasEnvironments: any;
 
     /**
      * Computed value, true if variables are available for current
      * environment.
      */
-    readonly hasVariables: boolean|null|undefined;
+    _hasVariables: boolean|null|undefined;
 
     /**
      * Computed value, true if there's a list of environments set.
      */
-    readonly hasEnvironments: boolean|null|undefined;
+    _hasEnvironments: boolean|null|undefined;
+
+    /**
+     * When set variables are not set automatically when element
+     * is attached to the DOM.
+     */
+    noAutoLoad: boolean|null|undefined;
     connectedCallback(): void;
     disconnectedCallback(): void;
 
@@ -81,7 +88,6 @@ declare namespace ArcComponents {
      * @returns True if scheduled refresh flow.
      */
     _onDatabaseDestroy(e: CustomEvent|null): Boolean|null;
-    _initVariables(): any;
 
     /**
      * Asks variables manager for current environment and variables.
@@ -94,35 +100,13 @@ declare namespace ArcComponents {
 
     /**
      * Refreshes list of variables and current environment.
-     *
-     * @param noThrows When set it does not throw error when model is
-     * not found.
      */
-    refreshState(noThrows: Boolean|null): void;
+    refreshState(): void;
 
     /**
      * Refreshes list of environments.
      */
     refreshEnvironments(): Promise<any>|null;
-
-    /**
-     * Retries environment list refresh after next frame render.
-     */
-    _retryRefreshEnv(): Promise<any>|null;
-
-    /**
-     * Computes `hasVariables` property.
-     *
-     * @returns True if list is not empty.
-     */
-    _computeHasVariables(length: Number|null): Boolean|null;
-
-    /**
-     * Computes `hasEnvironments` property.
-     *
-     * @returns True if list is not empty.
-     */
-    _computeHasEnvs(length: Number|null): Boolean|null;
 
     /**
      * Removes variables and updates environment.
@@ -168,3 +152,5 @@ declare namespace ArcComponents {
     _envUpdateHandler(e: CustomEvent|null): void;
   }
 }
+
+export {VariablesConsumerMixinConstructor};

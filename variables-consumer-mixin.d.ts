@@ -44,23 +44,25 @@ declare namespace ArcComponents {
      * List of available variables for the environment.
      */
     variables: Array<object|null>|null;
+    readonly hasVariables: any;
+    readonly hasEnvironments: any;
 
     /**
      * Computed value, true if variables are available for current
      * environment.
      */
-    readonly hasVariables: boolean|null|undefined;
+    _hasVariables: boolean|null|undefined;
 
     /**
      * Computed value, true if there's a list of environments set.
      */
-    readonly hasEnvironments: boolean|null|undefined;
+    _hasEnvironments: boolean|null|undefined;
 
     /**
      * When set variables are not set automatically when element
      * is attached to the DOM.
      */
-    noAuthoLoad: boolean|null|undefined;
+    noAutoLoad: boolean|null|undefined;
     connectedCallback(): void;
     disconnectedCallback(): void;
 
@@ -98,30 +100,13 @@ declare namespace ArcComponents {
 
     /**
      * Refreshes list of variables and current environment.
-     *
-     * @param noThrows When set it does not throw error when model is
-     * not found.
      */
-    refreshState(noThrows: Boolean|null): void;
+    refreshState(): void;
 
     /**
      * Refreshes list of environments.
      */
     refreshEnvironments(): Promise<any>|null;
-
-    /**
-     * Computes `hasVariables` property.
-     *
-     * @returns True if list is not empty.
-     */
-    _computeHasVariables(length: Number|null): Boolean|null;
-
-    /**
-     * Computes `hasEnvironments` property.
-     *
-     * @returns True if list is not empty.
-     */
-    _computeHasEnvs(length: Number|null): Boolean|null;
 
     /**
      * Removes variables and updates environment.

@@ -6,39 +6,15 @@
 
 # variables-consumer-mixin
 
-A web components mixin to be used by elements that consumes variables.
+A mixin function to be used by elements that consumes Advanced REST Client variables.
 
 The mixin works with:
-- @advanced-rest-client/arc-models/variables-model.js (or compatible events API)
-- @advanced-rest-client/variables-manager (or compatible events API)
+-   @advanced-rest-client/arc-models/variables-model.js (or compatible events API)
+-   @advanced-rest-client/variables-manager (or compatible events API)
 
-By default the component using the mixin will query for current environment (the manager) and then
+By default the component using the mixin queries for current environment (the manager) and then
 for variables list in the environment (data model). If this operation fails (for example model or
 manager is still being initialized) then it listens for manager events to refresh its state.
-
-
-```html
-<link rel="import" href="../variables-consumer-mixin/variables-consumer-mixin.html">
-<dom-module id="vars-consumer">
-  <script>
-  /**
-   * An example of implementation of VariablesConsumerMixin
-   *
-   * @customElement
-   * @polymer
-   * @appliesMixin ArcComponents.VariablesConsumerMixin
-   */
-  class VarsConsumer extends ArcComponents.VariablesConsumerMixin(Polymer.Element) {
-    static get is() {return 'vars-consumer';}
-    static get properties() {
-      return {};
-    }
-  }
-  window.customElements.define(VarsConsumer.is, VarsConsumer);
-  </script>
-</dom-module>
-```
-
 
 ## Usage
 
@@ -47,35 +23,28 @@ manager is still being initialized) then it listens for manager events to refres
 npm install --save @advanced-rest-client/variables-consumer-mixin
 ```
 
-### In a Polymer 3 element
+### In a LitElement template
 
-```js
-import {PolymerElement} from './node_modules/@polymer/polymer';
-import {VariablesConsumerMixin} from './node_modules/@advanced-rest-client/variables-consumer-mixin/variables-consumer-mixin.js';
+```javascript
+import { LitElement, html } from 'lit-element';
+import { VariablesConsumerMixin } from '@advanced-rest-client/variables-consumer-mixin/variables-consumer-mixin.js';
 
-class SampleElement extends VariablesConsumerMixin(PolymerElement) {
-
+class SampleElement extends VariablesConsumerMixin(LitElement) {
+  ...
 }
 customElements.define('sample-element', SampleElement);
 ```
 
-### Installation
+### Development
 
 ```sh
 git clone https://github.com/advanced-rest-client/variables-consumer-mixin
-cd api-url-editor
+cd variables-consumer-mixin
 npm install
-npm install -g polymer-cli
-```
-
-### Running the demo locally
-
-```sh
-polymer serve --npm
-open http://127.0.0.1:<port>/demo/
 ```
 
 ### Running the tests
+
 ```sh
-polymer test --npm
+npm test
 ```

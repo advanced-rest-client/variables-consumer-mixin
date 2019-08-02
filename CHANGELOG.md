@@ -26,3 +26,12 @@
 
 
 
+## [3.0.1](https://github.com/advanced-rest-client/variables-consumer-mixin/compare/2.0.0...3.0.1) (2019-08-02)
+
+
+### Bug Fixes
+
+* fixing refresing state after database destroy action ([2b66857](https://github.com/advanced-rest-client/variables-consumer-mixin/commit/2b66857))
+
+
+

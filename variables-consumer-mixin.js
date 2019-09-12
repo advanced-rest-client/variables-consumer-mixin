@@ -306,8 +306,8 @@ export const VariablesConsumerMixin = (base) => class extends base {
     let vars;
     if (eventVars && eventVars.length) {
       vars = eventVars.map((item) => Object.assign({}, item));
+      vars.sort(this._varSortFn);
     }
-    vars.sort(this._varSortFn);
     this.variables = vars;
   }
   /**

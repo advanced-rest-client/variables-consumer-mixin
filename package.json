@@ -28,19 +28,19 @@
   "devDependencies": {
     "@advanced-rest-client/eslint-config": "^1.1.2",
     "@advanced-rest-client/prettier-config": "^0.1.0",
-    "@advanced-rest-client/testing-karma-sl": "^1.0.4",
+    "@advanced-rest-client/testing-karma-sl": "^1.0.5",
     "@commitlint/cli": "^8.1.0",
     "@commitlint/config-conventional": "^7.0.0",
     "@open-wc/testing": "^2.3.3",
-    "@open-wc/testing-karma": "^3.1.31",
+    "@open-wc/testing-karma": "^3.1.33",
     "@polymer/gen-typescript-declarations": "^1.6.2",
     "deepmerge": "^4.0.0",
-    "es-dev-server": "^1.17.1",
+    "es-dev-server": "^1.18.0",
     "husky": "^1.0.0",
     "karma": "^4.3.0",
-    "lint-staged": "^8.0.0",
+    "lint-staged": "^9.2.5",
     "lit-html": "^1.1.2",
-    "sinon": "^7.4.1"
+    "sinon": "^7.4.2"
   },
   "scripts": {
     "test": "karma start --coverage",

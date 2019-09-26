@@ -1,5 +1,5 @@
 import { fixture, assert, defineCE, aTimeout } from '@open-wc/testing';
-import sinon from 'sinon/pkg/sinon-esm.js';
+import * as sinon from 'sinon/pkg/sinon-esm.js';
 import { VariablesConsumerMixin } from '../variables-consumer-mixin.js';
 
 const tag = defineCE(class extends VariablesConsumerMixin(HTMLElement) {});
@@ -885,6 +885,72 @@ describe('VariablesConsumerMixin', function() {
       element.variables = undefined;
       fire(vars[0], true);
       assert.isUndefined(element.variables);
+    });
+  });
+
+  describe('#variables', () => {
+    let element;
+    beforeEach(async () => {
+      element = await noAuthoLoadFixture();
+    });
+
+    it('dispatches variables-changed when setting variables', () => {
+      const spy = sinon.spy();
+      element.addEventListener('variables-changed', spy);
+      element.variables = [{}];
+      assert.isTrue(spy.called);
+      assert.deepEqual(spy.args[0][0].detail.value, [{}]);
+    });
+
+    it('calls _variablesChanged()', () => {
+      const spy = sinon.spy(element, '_variablesChanged');
+      element.variables = [{}];
+      assert.isTrue(spy.called);
+      assert.deepEqual(spy.args[0][0], [{}]);
+    });
+  });
+
+  describe('#environments', () => {
+    let element;
+    beforeEach(async () => {
+      element = await noAuthoLoadFixture();
+    });
+
+    it('dispatches environments-changed when setting variables', () => {
+      const spy = sinon.spy();
+      element.addEventListener('environments-changed', spy);
+      element.environments = [{}];
+      assert.isTrue(spy.called);
+      assert.deepEqual(spy.args[0][0].detail.value, [{}]);
+    });
+
+    it('calls _environmentsChanged()', () => {
+      const spy = sinon.spy(element, '_environmentsChanged');
+      element.environments = [{}];
+      assert.isTrue(spy.called);
+      assert.deepEqual(spy.args[0][0], [{}]);
+    });
+  });
+
+  describe('#environment', () => {
+    let element;
+    beforeEach(async () => {
+      element = await noAuthoLoadFixture();
+    });
+
+    it('dispatches environment-changed when setting variables', () => {
+      const spy = sinon.spy();
+      element.addEventListener('environment-changed', spy);
+      element.environment = 'test';
+      assert.isTrue(spy.called);
+      assert.deepEqual(spy.args[0][0].detail.value, 'test');
+    });
+
+    it('calls _environmentChanged()', () => {
+      const spy = sinon.spy(element, '_environmentChanged');
+      element.environment = 'test';
+      assert.isTrue(spy.called);
+      assert.deepEqual(spy.args[0][0], 'test');
     });
   });
 });

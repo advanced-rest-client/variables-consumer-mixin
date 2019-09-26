@@ -70,6 +70,7 @@ export const VariablesConsumerMixin = (base) => class extends base {
     if (this.requestUpdate) {
       this.requestUpdate('environment', old);
     }
+    this._environmentChanged(value);
     this.dispatchEvent(new CustomEvent('environment-changed', {
       detail: {
         value
@@ -91,6 +92,7 @@ export const VariablesConsumerMixin = (base) => class extends base {
     if (this.requestUpdate) {
       this.requestUpdate('environments', old);
     }
+    this._environmentsChanged(value);
     this.dispatchEvent(new CustomEvent('environments-changed', {
       detail: {
         value
@@ -112,6 +114,7 @@ export const VariablesConsumerMixin = (base) => class extends base {
     if (this.requestUpdate) {
       this.requestUpdate('variables', old);
     }
+    this._variablesChanged(value);
     this.dispatchEvent(new CustomEvent('variables-changed', {
       detail: {
         value
@@ -170,6 +173,18 @@ export const VariablesConsumerMixin = (base) => class extends base {
     window.removeEventListener('data-imported', this._dataImportHandler);
     window.removeEventListener('datastore-destroyed', this._onDatabaseDestroy);
   }
+  /**
+   * To be overritem by implementing elements
+   */
+  _variablesChanged() {}
+  /**
+   * To be overritem by implementing elements
+   */
+  _environmentsChanged() {}
+  /**
+   * To be overritem by implementing elements
+   */
+  _environmentChanged() {}
   /**
    * Dispatches bubbling and composed custom event.
    * By default the event is cancelable until `cancelable` property is set to false.

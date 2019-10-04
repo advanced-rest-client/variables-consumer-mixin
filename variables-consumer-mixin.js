@@ -280,7 +280,6 @@ export const VariablesConsumerMixin = (base) => class extends base {
       vars = [];
     }
     vars = Array.from(vars);
-    vars.sort(this._varSortFn);
     this.variables = vars;
   }
   /**
@@ -321,7 +320,6 @@ export const VariablesConsumerMixin = (base) => class extends base {
     let vars;
     if (eventVars && eventVars.length) {
       vars = eventVars.map((item) => Object.assign({}, item));
-      vars.sort(this._varSortFn);
     }
     this.variables = vars;
   }
@@ -350,7 +348,6 @@ export const VariablesConsumerMixin = (base) => class extends base {
     } else {
       vars[index] = variable;
     }
-    vars.sort(this._varSortFn);
     this.variables = [...vars];
   }
   /**
@@ -370,21 +367,6 @@ export const VariablesConsumerMixin = (base) => class extends base {
     const vars = this.variables;
     vars.splice(index, 1);
     this.variables = [...vars];
-  }
-
-  _varSortFn(a, b) {
-    if (!a) {
-      return 1;
-    }
-    if (!b) {
-      return -1;
-    }
-    const aName = String(a.variable);
-    const bName = String(b.variable);
-    return aName.localeCompare(bName, {
-      ignorePunctuation: true,
-      sensitivity: 'base'
-    });
   }
   /**
    * Finds variable index on the variables list.

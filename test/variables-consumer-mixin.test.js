@@ -704,16 +704,6 @@ describe('VariablesConsumerMixin', function() {
       assert.lengthOf(element.variables, 5);
     });
 
-    it('sorts the array', () => {
-      currentHandler(element, vars);
-      element.refreshState();
-      assert.equal(element.variables[0].variable, 'deal');
-      assert.equal(element.variables[1].variable, 'imprint');
-      assert.equal(element.variables[2].variable, 'shrink');
-      assert.equal(element.variables[3].variable, 'swing');
-      assert.equal(element.variables[4].variable, 'terminate');
-    });
-
     it('ignores non array variables', () => {
       currentHandler(element, 'test');
       element.refreshState();
@@ -787,19 +777,10 @@ describe('VariablesConsumerMixin', function() {
       assert.lengthOf(element.variables, 5);
     });
 
-    it('sorts the array', () => {
-      fire(vars);
-      assert.equal(element.variables[0].variable, 'deal');
-      assert.equal(element.variables[1].variable, 'imprint');
-      assert.equal(element.variables[2].variable, 'shrink');
-      assert.equal(element.variables[3].variable, 'swing');
-      assert.equal(element.variables[4].variable, 'terminate');
-    });
-
     it('creates a copy of array item', () => {
       fire(vars);
       vars[0].variable = 'xxxxx';
-      assert.equal(element.variables[3].variable, 'swing');
+      assert.equal(element.variables[0].variable, 'swing');
     });
 
     it('ignores cancelable events', () => {
@@ -864,21 +845,21 @@ describe('VariablesConsumerMixin', function() {
       assert.lengthOf(element.variables, 1);
     });
 
-    it('adds new item and sorts them', () => {
+    it('adds new item', () => {
       fire({
         _id: 'aaa',
         variable: 'aaa',
         environment: 'test'
       });
       assert.lengthOf(element.variables, 6);
-      assert.equal(element.variables[0].variable, 'aaa');
+      assert.equal(element.variables[5].variable, 'aaa');
     });
 
-    it('updates existing and sorts them', () => {
+    it('updates existing', () => {
       const item = Object.assign({}, vars[1]); // deal
       item.variable = 'zzz';
       fire(item);
-      assert.equal(element.variables[4].variable, 'zzz');
+      assert.equal(element.variables[1].variable, 'zzz');
     });
 
     it('ignores cancelable events', () => {

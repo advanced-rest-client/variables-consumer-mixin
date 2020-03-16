@@ -3,7 +3,8 @@
   "description": "Mixin to be used by elements that consumes variables",
   "version": "3.0.6",
   "license": "Apache-2.0",
-  "main": "variables-consumer-mixin.js",
+  "main": "index.js",
+  "module": "index.js",
   "keywords": [
     "advanced-rest-client",
     "variables",
